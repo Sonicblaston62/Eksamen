@@ -1,3 +1,58 @@
-<nav><a href="index.html">Hjem</a> | <a href="tjenester.html">Tjenester</a> | <a href="kontakt.html">Kontakt</a> | <a href="portal.html">Kundeportal</a></nav>
-<h1>Dokumentasjon</h1>
-<div>DNS Oppsett o.l</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasjon</title>
+    <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+    <nav><a href="index.html">Hjem</a> | <a href="tjenester.html">Tjenester</a> | <a href="kontakt.html">Kontakt</a> | <a href="portal.html">Kundeportal</a></nav>
+    <main class="page-content">
+        <h1>Dokumentasjon</h1>
+        <section>
+            <h2>Nettverksoppsett – KontorLeie AS</h2>
+            <hr>
+            <h3>Utstyr</h3>
+            <ul>
+                <li>1x F-Secure brannmur (simulert som Cisco ASA i Packet Tracer)</li>
+                <li>1x Cisco 2911 ruter</li>
+                <li>1x Cisco 3560 L3 managed switch (hoved)</li>
+                <li>3x Cisco 2960 L2 managed switch (en per bedrift)</li>
+                <li>Per bedrift: PC-er, nettverksprinter, filserver, Access Point (AP)</li>
+            </ul>
+            <h3>Topologi</h3>
+            <p>Internett-linjen går inn i F-Secure brannmuren. Brannmuren sitter mellom internett og resten av nettverket og kontrollerer all trafikk inn og ut. Bak brannmuren kobles ruteren, som videreformidler trafikk mellom subnettene og ut mot internett. Ruteren kobles til hoved-switchen (L3), som igjen kobles til én dedikert L2 managed switch per bedrift via trunk-porter.</p>
+            <p>Hver bedriftsswitch kobles videre til ethernet-porter i veggen og trådløse aksesspunkter (AP) for tilkobling av utstyr.</p>
+            <h3>Subnett og VLAN</h3>
+            <p>Hver bedrift får et isolert subnett og VLAN. Utstyr på ett subnett kan ikke kommunisere med utstyr på et annet.</p>
+            <table>
+                <thead>
+                    <tr><th>VLAN</th><th>Subnett</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Bedrift 1</td><td>10 / 192.168.10.0/24</td></tr>
+                    <tr><td>Bedrift 2</td><td>20 / 192.168.20.0/24</td></tr>
+                    <tr><td>Bedrift 3</td><td>30 / 192.168.30.0/24</td></tr>
+                    <tr><td>Management</td><td>99 / 192.168.1.0/24</td></tr>
+                </tbody>
+            </table>
+            <p>Innenfor hver bedrift kan tilgangsnivåer differensieres med egne VLAN basert på rolle (f.eks. admin, ansatt, gjest).</p>
+            <h3>Statiske IP-adresser per bedrift</h3>
+            <table>
+                <thead>
+                    <tr><th>Enhet</th><th>B1</th><th>B2</th><th>B3</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Filserver</td><td>192.168.10.10</td><td>192.168.20.10</td><td>192.168.30.10</td></tr>
+                    <tr><td>Nettverksprinter</td><td>192.168.10.20</td><td>192.168.20.20</td><td>192.168.30.20</td></tr>
+                    <tr><td>Gateway</td><td>192.168.10.1</td><td>192.168.20.1</td><td>192.168.30.1</td></tr>
+                </tbody>
+            </table>
+            <p>Øvrig utstyr (PC-er, AP-er) tildeles IP automatisk via DHCP innenfor .100–.200.</p>
+            <h3>Tilgangsstyring</h3>
+            <p>IT-ansvarlige i hver bedrift har begrenset tilgang til egen switch (VLAN-konfigurasjon, feilsøking). De har ikke tilgang til hoved-switchen eller andre bedrifters utstyr. Brannmuren styrer portåpninger og blokkerer trafikk mellom subnettene.</p>
+            <img src="bilder/network_topology.svg" alt="diagram"></section>
+    </main>
+</body>
+</html>
