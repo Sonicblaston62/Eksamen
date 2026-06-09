@@ -80,4 +80,4 @@ KontorLeie AS leier ut kontorplasser til private kunder og små bedrifter (1–1
 
 ---
 
-*Eksamensprosjekt 2025*
+*Eksamensprosjekt 2026*
