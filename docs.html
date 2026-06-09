@@ -9,50 +9,317 @@
 <body>
     <nav><a href="index.html">Hjem</a> | <a href="tjenester.html">Tjenester</a> | <a href="kontakt.html">Kontakt</a> | <a href="portal.html">Kundeportal</a></nav>
     <main class="page-content">
-        <h1>Dokumentasjon</h1>
-        <section>
-            <h2>Nettverksoppsett – KontorLeie AS</h2>
-            <hr>
-            <h3>Utstyr</h3>
-            <ul>
-                <li>1x F-Secure brannmur (simulert som Cisco ASA i Packet Tracer)</li>
-                <li>1x Cisco 2911 ruter</li>
-                <li>1x Cisco 3560 L3 managed switch (hoved)</li>
-                <li>3x Cisco 2960 L2 managed switch (en per bedrift)</li>
-                <li>Per bedrift: PC-er, nettverksprinter, filserver, Access Point (AP)</li>
-            </ul>
-            <h3>Topologi</h3>
-            <p>Internett-linjen går inn i F-Secure brannmuren. Brannmuren sitter mellom internett og resten av nettverket og kontrollerer all trafikk inn og ut. Bak brannmuren kobles ruteren, som videreformidler trafikk mellom subnettene og ut mot internett. Ruteren kobles til hoved-switchen (L3), som igjen kobles til én dedikert L2 managed switch per bedrift via trunk-porter.</p>
-            <p>Hver bedriftsswitch kobles videre til ethernet-porter i veggen og trådløse aksesspunkter (AP) for tilkobling av utstyr.</p>
-            <h3>Subnett og VLAN</h3>
-            <p>Hver bedrift får et isolert subnett og VLAN. Utstyr på ett subnett kan ikke kommunisere med utstyr på et annet.</p>
-            <table>
-                <thead>
-                    <tr><th>VLAN</th><th>Subnett</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Bedrift 1</td><td>10 / 192.168.10.0/24</td></tr>
-                    <tr><td>Bedrift 2</td><td>20 / 192.168.20.0/24</td></tr>
-                    <tr><td>Bedrift 3</td><td>30 / 192.168.30.0/24</td></tr>
-                    <tr><td>Management</td><td>99 / 192.168.1.0/24</td></tr>
-                </tbody>
-            </table>
-            <p>Innenfor hver bedrift kan tilgangsnivåer differensieres med egne VLAN basert på rolle (f.eks. admin, ansatt, gjest).</p>
-            <h3>Statiske IP-adresser per bedrift</h3>
-            <table>
-                <thead>
-                    <tr><th>Enhet</th><th>B1</th><th>B2</th><th>B3</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Filserver</td><td>192.168.10.10</td><td>192.168.20.10</td><td>192.168.30.10</td></tr>
-                    <tr><td>Nettverksprinter</td><td>192.168.10.20</td><td>192.168.20.20</td><td>192.168.30.20</td></tr>
-                    <tr><td>Gateway</td><td>192.168.10.1</td><td>192.168.20.1</td><td>192.168.30.1</td></tr>
-                </tbody>
-            </table>
-            <p>Øvrig utstyr (PC-er, AP-er) tildeles IP automatisk via DHCP innenfor .100–.200.</p>
-            <h3>Tilgangsstyring</h3>
-            <p>IT-ansvarlige i hver bedrift har begrenset tilgang til egen switch (VLAN-konfigurasjon, feilsøking). De har ikke tilgang til hoved-switchen eller andre bedrifters utstyr. Brannmuren styrer portåpninger og blokkerer trafikk mellom subnettene.</p>
-            <img src="bilder/network_topology.svg" alt="diagram"></section>
+        <header class="doc-header">
+            <h1>Dokumentasjon</h1>
+            <p>Veileder for IT-ansvarlige i leietakerbedrifter. Her finner du steg-for-steg hjelp til Active Directory, tilgangsstyring og nettverksoppsett.</p>
+        </header>
+
+        <section class="pdf-viewer">
+            <object data="AD_Veileder.pdf" type="application/pdf" width="100%" height="520">
+                <p>PDF-visning er ikke tilgjengelig i denne nettleseren. <a href="AD_Veileder.pdf">Last ned AD-veilederen her.</a></p>
+            </object>
+        </section>
+
+        <div class="doc-summary-grid">
+            <section class="doc-box">
+                <h2>Last ned veilederen</h2>
+                <p>Åpne hele AD-veilederen som PDF for offline lesing og deling.</p>
+                <p><a class="button-primary" href="AD_Veileder.pdf" target="_blank" rel="noopener">Åpne PDF</a></p>
+            </section>
+            <section class="doc-box">
+                <h2>Innhold</h2>
+                <ul>
+                    <li><a href="#forutsetninger">Forutsetninger</a></li>
+                    <li><a href="#bruker">Opprette en ny bruker</a></li>
+                    <li><a href="#tilgang">Tilgangsstyring</a></li>
+                    <li><a href="#hurtigreferanse">Hurtigreferanse</a></li>
+                    <li><a href="#kontakt">Kontakt</a></li>
+                </ul>
+            </section>
+        </div>
+
+        <section id="forutsetninger" class="doc-section">
+            <h2>Del 1: Forutsetninger</h2>
+            <p>Denne delen forklarer hva som må være installert og satt opp på serveren før du kan begynne å bruke Active Directory. Disse stegene gjøres vanligvis kun en gang, av KontorLeie AS sin IT-avdeling, når du flytter inn.</p>
+
+            <article>
+                <h3>Hva er Windows Server?</h3>
+                <p>Windows Server er operativsystemet som kjører på bedriftens server. Det ligner på vanlig Windows, men er laget for å styre brukere, nettverk og filer for hele bedriften.</p>
+            </article>
+
+            <article>
+                <h3>Hva må være installert på serveren</h3>
+                <p>Før Active Directory kan brukes, må følgende være gjort på Windows Server. Hvis du er usikker, ta kontakt med KontorLeie AS sin IT-avdeling.</p>
+                <h4>1. Windows Server er installert</h4>
+                <p>Sjekk at du kan starte opp Windows Server og at maskinen fungerer som forventet. Dette skal allerede være gjort når du får serveren. Hvis ikke, kontakt KontorLeie AS sin IT-avdeling.</p>
+                <h4>2. Active Directory Domain Services (AD DS) er installert</h4>
+                <p>AD DS er selve programvaren som lar deg administrere brukere og tilganger. Den må installeres separat, men kommer med din installasjon.</p>
+                <ol class="doc-steps">
+                    <li>Klikk på Start-knappen nede til venstre på serveren</li>
+                    <li>Klikk på 'Server Manager' (dette er administrasjonsprogrammet for serveren)</li>
+                    <li>Se i venstre meny - hvis du ser 'AD DS' i lista, er det installert</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>OBS:</strong> Opprettelse av domene (siste steg over) er en avansert operasjon. Kontakt KontorLeie AS sin IT-avdeling hvis dette ikke er gjort fra før.
+                </div>
+                <h4>3. Et domene er opprettet</h4>
+                <p>Et domene er et fellesområde der alle brukere og datamaskiner er samlet under ett navn. Alle PC-er og brukere i bedriften din er registrert her. Domenenavnet ser gjerne slik ut: bedrift1.lokal</p>
+                <ol class="doc-steps">
+                    <li>Klikk Start på serveren</li>
+                    <li>Søk etter 'Active Directory Users and Computers' og åpne programmet</li>
+                    <li>Hvis du ser et mappenavn (f.eks. bedrift1.lokal) i venstre panel, er domenet klart</li>
+                </ol>
+                <h4>4. PC-ene er koblet til domenet</h4>
+                <p>Når en PC er koblet til domenet, betyr det at den lar brukere logge inn med kontoene du oppretter i Active Directory. En PC som ikke er koblet til domenet, fungerer uavhengig og kjenner ikke til brukerne du lager.</p>
+                <ol class="doc-steps">
+                    <li>Høyreklikk på Start-knappen på PC-en</li>
+                    <li>Velg System</li>
+                    <li>Se under 'Computer name, domain and workgroup settings'</li>
+                    <li>Hvis det står 'Domain: bedrift1.lokal' (eller lignende), er PC-en koblet til domenet</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Alle PC-er må være koblet til domenet for at brukerne du oppretter i Active Directory skal kunne logge inn.
+                </div>
+                <div class="doc-callout">
+                    <strong>OBS:</strong> Hvis noe av dette ikke er på plass, ta kontakt med KontorLeie AS sin IT-avdeling på <a href="mailto:kontorutleie@hotmail.no">kontorutleie@hotmail.no</a> før du fortsetter.
+                </div>
+            </article>
+
+            <article>
+                <h3>Topologi</h3>
+                <p>Internett-linjen går inn i F-Secure brannmuren. Brannmuren sitter mellom internett og resten av nettverket og kontrollerer all trafikk inn og ut. Bak brannmuren kobles ruteren, som videreformidler trafikk mellom subnettene og ut mot internett. Ruteren kobles til hoved-switchen (L3), som igjen kobles til én dedikert L2 managed switch per bedrift via trunk-porter.</p>
+                <figure class="doc-image">
+                    <img src="bilder/network_topology.svg" alt="Nettverkstopologi for kontorleie">
+                    <figcaption>Grafisk oversikt over nettverkstopologi og VLAN-separasjon.</figcaption>
+                </figure>
+                <p>Hver bedriftsswitch kobles videre til ethernet-porter i veggen og trådløse aksesspunkter (AP) for tilkobling av utstyr.</p>
+                <h4>Subnett og VLAN</h4>
+                <p>Hver bedrift får et isolert subnett og VLAN. Utstyr på ett subnett kan ikke kommunisere med utstyr på et annet.</p>
+                <table>
+                    <thead>
+                        <tr><th>VLAN</th><th>Subnett</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Bedrift 1</td><td>192.168.10.0/24</td></tr>
+                        <tr><td>Bedrift 2</td><td>192.168.20.0/24</td></tr>
+                        <tr><td>Bedrift 3</td><td>192.168.30.0/24</td></tr>
+                        <tr><td>Management</td><td>192.168.1.0/24</td></tr>
+                    </tbody>
+                </table>
+                <h4>Statiske IP-adresser per bedrift</h4>
+                <table>
+                    <thead>
+                        <tr><th>Enhet</th><th>B1</th><th>B2</th><th>B3</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Filserver</td><td>192.168.10.10</td><td>192.168.20.10</td><td>192.168.30.10</td></tr>
+                        <tr><td>Nettverksprinter</td><td>192.168.10.20</td><td>192.168.20.20</td><td>192.168.30.20</td></tr>
+                        <tr><td>Gateway</td><td>192.168.10.1</td><td>192.168.20.1</td><td>192.168.30.1</td></tr>
+                    </tbody>
+                </table>
+                <p>Øvrig utstyr (PC-er, AP-er) tildeles IP automatisk via DHCP innenfor .100–.200.</p>
+                <h4>Tilgangsstyring</h4>
+                <p>IT-ansvarlige i hver bedrift har begrenset tilgang til egen switch (VLAN-konfigurasjon, feilsøking). De har ikke tilgang til hoved-switchen eller andre bedrifters utstyr. Brannmuren styrer portåpninger og blokkerer trafikk mellom subnettene.</p>
+            </article>
+        </section>
+
+        <section id="bruker" class="doc-section">
+            <h2>Del 2: Opprette en ny bruker</h2>
+            <article>
+                <h3>Hva er en bruker i Active Directory?</h3>
+                <p>En bruker er en konto som en person bruker for å logge inn på PC-en og få tilgang til filer og programmer. Tenk på det som et digitalt ID-kort. Uten en konto kan ikke den ansatte logge inn på noen av bedriftens PC-er.</p>
+            </article>
+            <article>
+                <h3>Steg 1: Åpne administrasjonsprogrammet</h3>
+                <ol class="doc-steps">
+                    <li>Klikk på Start-knappen på serveren</li>
+                    <li>Skriv inn: Active Directory Users and Computers</li>
+                    <li>Klikk på programmet når det dukker opp i søkeresultatet</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Programmet kan også finnes via: Server Manager > Tools > Active Directory Users and Computers.
+                </div>
+            </article>
+            <article>
+                <h3>Steg 2: Finn riktig mappe</h3>
+                <p>En OU er en mappe inne i Active Directory der du sorterer brukere. Akkurat som du sorterer filer i mapper på PC-en, sorterer du brukere i OU-er. Du bør ha en mappe kalt 'Brukere' under bedriftens navn.</p>
+                <ol class="doc-steps">
+                    <li>Klikk på pilen ved siden av domenenavnet for å utvide treet</li>
+                    <li>Finn mappen som heter 'Brukere' (eller 'Users')</li>
+                    <li>Klikk på den mappen så den er markert</li>
+                </ol>
+            </article>
+            <article>
+                <h3>Steg 3: Opprett brukeren</h3>
+                <ol class="doc-steps">
+                    <li>Høyreklikk på 'Brukere'-mappen</li>
+                    <li>Velg New > User</li>
+                </ol>
+                <p>Fyll inn First name, Last name, Full name og User logon name, og klikk Neste når feltene er fylt ut.</p>
+            </article>
+            <article>
+                <h3>Steg 4: Sett passord</h3>
+                <ol class="doc-steps">
+                    <li>Skriv inn et midlertidig passord i begge passordfeltene</li>
+                    <li>Huk av 'User must change password at next logon'</li>
+                    <li>Klikk Neste</li>
+                    <li>Klikk Fullføre / Finish</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>OBS:</strong> Del aldri passordet på e-post. Gi det muntlig eller ring brukeren direkte.
+                </div>
+            </article>
+            <article>
+                <h3>Steg 5: Legg brukeren i en gruppe</h3>
+                <p>En gruppe er en samling av brukere. I stedet for å gi tilgang til mapper én og én, gir du tilgang til en gruppe. Når du legger en bruker i gruppen, får de automatisk de samme tilgangene.</p>
+                <ol class="doc-steps">
+                    <li>Høyreklikk på den nye brukeren du nettopp opprettet</li>
+                    <li>Velg Properties</li>
+                    <li>Klikk på fanen: Member Of</li>
+                    <li>Klikk Add</li>
+                    <li>Skriv inn gruppenavnet, f.eks. Ansatt_Bedrift1</li>
+                    <li>Klikk OK, og deretter OK igjen</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Usikker på hvilken gruppe brukeren skal være i? Se oversikten i Del 4 bakerst i veilederen.
+                </div>
+            </article>
+        </section>
+
+        <section id="tilgang" class="doc-section">
+            <h2>Del 3: Gi tilgang til mapper og filer</h2>
+            <article>
+                <h3>Slik fungerer tilgangsstyring</h3>
+                <p>Tenk deg at filserveren er et kontorbygg med mange rom. Noen rom er åpne for alle ansatte. Andre rom er kun for ledere. Du bestemmer hvem som kommer inn i hvilke rom ved å gi grupper en nøkkel. Når du legger en person i gruppen, får de den nøkkelen automatisk.</p>
+                <p>I praksis fungerer det i to steg:</p>
+                <ul>
+                    <li>Steg A: Du oppretter en gruppe i Active Directory</li>
+                    <li>Steg B: Du gir den gruppen tilgang til en mappe på filserveren</li>
+                </ul>
+            </article>
+            <article>
+                <h3>Steg A: Opprett en gruppe</h3>
+                <ol class="doc-steps">
+                    <li>Åpne Active Directory Users and Computers</li>
+                    <li>Finn mappen 'Grupper' under bedriftens domene. Hvis den ikke finnes, bruk 'Brukere'-mappen</li>
+                    <li>Høyreklikk på mappen > New > Group</li>
+                    <li>Gi gruppen et navn. Bruk formatet: Rolle_Bedriftsnavn</li>
+                    <li>Under Group type: velg Security</li>
+                    <li>Under Group scope: velg Global</li>
+                    <li>Klikk OK</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Lag separate grupper for ulike roller, f.eks. Ansatt_Bedrift1 og Leder_Bedrift1. Da kan du gi ledere ekstra mapper uten å påvirke vanlige ansatte.
+                </div>
+            </article>
+            <article>
+                <h3>Steg B: Gi gruppen tilgang til en mappe</h3>
+                <p>Dette gjøres på filserveren, i Windows Utforsker (File Explorer).</p>
+                <ol class="doc-steps">
+                    <li>Åpne Windows Utforsker på serveren</li>
+                    <li>Naviger til mappen du vil gi tilgang til</li>
+                    <li>Høyreklikk på mappen > velg Properties</li>
+                    <li>Klikk på fanen: Security</li>
+                    <li>Klikk: Edit</li>
+                    <li>Klikk: Add</li>
+                    <li>Skriv inn gruppenavnet (f.eks. Ansatt_Bedrift1) og klikk OK</li>
+                    <li>Velg riktig tilgangsnivå i lista</li>
+                    <li>Klikk OK, og deretter OK igjen</li>
+                </ol>
+            </article>
+            <article>
+                <h3>Hvilken tilgang skal du gi?</h3>
+                <table>
+                    <thead>
+                        <tr><th>Tilgangsnivå</th><th>Kan gjøre</th><th>Bruk dette til</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Read</td><td>Åpne og lese filer</td><td>Delte maler, informasjon alle skal se men ikke endre</td></tr>
+                        <tr><td>Modify</td><td>Lese, skrive og slette filer</td><td>Vanlige ansatte - den vanligste innstillingen</td></tr>
+                        <tr><td>Full Control</td><td>Alt - inkludert å endre tilganger</td><td>Kun IT-ansvarlig</td></tr>
+                    </tbody>
+                </table>
+                <div class="doc-callout">
+                    <strong>OBS:</strong> Gi aldri Full Control til vanlige ansatte. Hvis noen utilsiktet sletter eller endrer tilganger, kan det ramme hele bedriften.
+                </div>
+            </article>
+            <article>
+                <h3>Test at tilgangen fungerer</h3>
+                <ol class="doc-steps">
+                    <li>Logg inn på en PC med brukerkontoen du nettopp opprettet</li>
+                    <li>Åpne Windows Utforsker og naviger til mappen</li>
+                    <li>Prøv å åpne en fil - det skal fungere</li>
+                    <li>Prøv å åpne en mappe du IKKE skal ha tilgang til - du skal få meldingen 'Access denied'</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Virker ikke tilgangen med en gang? Logg ut og inn igjen. Tilganger oppdateres når brukeren logger inn på nytt.
+                </div>
+            </article>
+        </section>
+
+        <section id="hurtigreferanse" class="doc-section">
+            <h2>Del 4: Hurtigreferanse</h2>
+            <article>
+                <h3>Når en ansatt slutter</h3>
+                <div class="doc-callout">
+                    <strong>OBS:</strong> Det er viktig å deaktivere kontoen umiddelbart når noen slutter, så de ikke lenger har tilgang til bedriftens systemer.
+                </div>
+                <ol class="doc-steps">
+                    <li>Åpne Active Directory Users and Computers</li>
+                    <li>Finn brukeren i 'Brukere'-mappen</li>
+                    <li>Høyreklikk på brukeren > velg Disable Account</li>
+                    <li>Brukeren kan ikke lenger logge inn, men kontoen og filene er fortsatt lagret</li>
+                </ol>
+                <div class="doc-callout">
+                    <strong>Tips:</strong> Slett ikke kontoen med en gang - vent 30 dager. Da kan du hente tilbake filer eller informasjon om det trengs.
+                </div>
+            </article>
+            <article>
+                <h3>Vanlige problemer og løsninger</h3>
+                <table>
+                    <thead>
+                        <tr><th>Problem</th><th>Løsning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Brukeren kan ikke logge inn</td><td>Sjekk om kontoen er låst. Høyreklikk brukeren i Active Directory > 'Unlock Account'. Sjekk også at passordet ikke er utløpt.</td></tr>
+                        <tr><td>Brukeren ser ikke mappen på filserveren</td><td>Sjekk at brukeren er lagt til i riktig gruppe. Høyreklikk bruker > Properties > Member Of. Logg brukeren ut og inn igjen etterpå.</td></tr>
+                        <tr><td>Brukeren får 'Access denied' på en mappe de skal ha tilgang til</td><td>Sjekk NTFS-tillatelsene på mappen: høyreklikk mappe > Properties > Security. Sjekk at gruppen er der og har riktig tilgangsnivå.</td></tr>
+                        <tr><td>Brukeren glemte passordet</td><td>Høyreklikk bruker > 'Reset Password'. Sett et nytt midlertidig passord og huk av 'must change at next logon'.</td></tr>
+                        <tr><td>En ny PC kobles ikke til domenet</td><td>Pass på at PC-en er koblet til bedriftens nettverk. Kontakt KontorLeie AS sin IT-avdeling for hjelp.</td></tr>
+                    </tbody>
+                </table>
+            </article>
+            <article>
+                <h3>Sjekkliste - ny ansatt</h3>
+                <ul>
+                    <li>Brukerkonto opprettet med fornavn, etternavn og brukernavn</li>
+                    <li>Midlertidig passord satt - bruker må bytte ved første innlogging</li>
+                    <li>Brukeren er lagt til i riktig gruppe (f.eks. Ansatt_Bedrift1)</li>
+                    <li>Tilgang til fellesmapper er testet og fungerer</li>
+                    <li>Brukeren har fått sitt brukernavn og midlertidige passord</li>
+                </ul>
+            </article>
+        </section>
+
+        <section id="kontakt" class="doc-section">
+            <h2>Kontakt</h2>
+            <p>Trenger du hjelp med noe som ikke er dekket i denne veilederen?</p>
+            <div class="doc-summary-grid">
+                <section class="doc-box">
+                    <h3>E-post</h3>
+                    <p><a href="mailto:Kontorutleie@hotmail.com">Kontorutleie@hotmail.com</a></p>
+                </section>
+                <section class="doc-box">
+                    <h3>Telefon</h3>
+                    <p><a href="tel:+4799999999">+47 99 99 99 99</a></p>
+                </section>
+                <section class="doc-box">
+                    <h3>Åpningstider</h3>
+                    <p>Mandag-fredag 08:00-16:00</p>
+                </section>
+            </div>
+        </section>
     </main>
+    <script src="main.js"></script>
 </body>
 </html>
